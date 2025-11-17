@@ -146,6 +146,11 @@ A continuación se documenta el proceso completo de configuración de la replica
 
 
 ---
+### 8 Estado de Agente con snapshot
+
+![Paso 9](imagenes_rp/estado_de_agente.png)
+
+
 
 ---
 ## Fin del proceso
