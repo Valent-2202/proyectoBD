@@ -34,7 +34,7 @@ Año: 2025
 
 
 
-#  Índice
+#  Índices
 
 - [CAPÍTULO I — INTRODUCCIÓN](#capítulo-i--introducción)
   - [1. Caso de Estudio](#1-caso-de-estudio)
@@ -45,6 +45,7 @@ Año: 2025
   - [TEMA 1 – Procedimientos y Funciones](#tema-1--procedimientos-y-funciones-en-sql-server)
   - [TEMA 2 – Optimización mediante Índices](#tema-2--optimización-de-consultas-mediante-índices-en-sql-server)
   - [TEMA 3 – Transacciones, COMMIT y ROLLBACK](#tema-3--manejo-de-transacciones-commit-y-rollback)
+  - [TEMA 4 – Replicación de Bases de Datos](#tema-4--replicación-de-bases-de-datos-en-sql-server)
 - [CAPÍTULO III — METODOLOGÍA DE DESARROLLO](#capítulo-iii--metodología-de-desarrollo)
   - [1. Identificación de Entidades](#1-identificación-y-relevamiento-de-entidades-del-dominio)
   - [2. Modelo ER](#2-diseño-conceptual-modelo-entidadrelación-er)
@@ -326,6 +327,159 @@ El control transaccional asegura:
 - Operaciones confiables  
 
 En un sistema como SISGYM, donde múltiples operaciones dependen unas de otras, las transacciones son la base para garantizar que la información refleje siempre un estado correcto y consistente.
+
+---
+
+# TEMA 4 – Replicación de Bases de Datos en SQL Server
+
+La replicación de bases de datos es una tecnología fundamental dentro de SQL Server para distribuir datos entre múltiples servidores, mejorar la disponibilidad, garantizar la integridad de la información en entornos remotos y permitir la sincronización continua de registros. En sistemas transaccionales como **SISGYM**, donde distintos usuarios trabajan desde ubicaciones diferentes (por ejemplo, sedes separadas o servidores conectados mediante VPN), la replicación se vuelve un componente clave para asegurar un flujo de datos confiable y actualizado.
+
+---
+
+## Objetivo principal de la replicación
+
+Permitir que la información almacenada en un servidor **publicador** sea enviada y mantenida en uno o varios servidores **suscriptores**, manteniendo coherencia entre todos los nodos involucrados.
+
+En este modelo:
+
+- **Publicador:** fuente principal de los datos.
+- **Distribuidor:** administra los cambios y los envía a los suscriptores.
+- **Suscriptores:** reciben los datos y los almacenan en sus propias bases.
+
+Esto garantiza que los servidores remotos tengan una copia actualizada del sistema sin necesidad de acceder directamente a la base original.
+
+---
+
+# Tipos de replicación aplicables
+
+SQL Server ofrece varias modalidades:
+
+1. **Replicación transaccional**  
+2. **Replicación Snapshot**  
+3. **Replicación de Mezcla (Merge)**  
+4. **Replicación Peer-to-Peer**  
+5. **Replicación Bidireccional**  
+6. **Replicación Híbrida con Azure**
+
+---
+
+# 1. Replicación Transaccional (la usada en SISGYM)
+
+Es el modelo más utilizado para sistemas altamente transaccionales, donde los cambios ocurren con frecuencia y la sincronización debe ser rápida y confiable.
+
+### Características principales:
+
+- Envía cambios casi en tiempo real.  
+- Se basa en el log de transacciones.  
+- Los suscriptores reciben `INSERT/UPDATE/DELETE` a medida que ocurren.  
+- Mantiene alta consistencia entre nodos.  
+- Excelente para sistemas OLTP.
+
+### Usos típicos:
+
+- Sistemas de gestión (turnos, pagos, registros diarios).  
+- Sincronización entre sedes.  
+- Reportes en servidores secundarios.
+
+---
+
+# 2. Replicación Snapshot
+
+Crea una “foto” completa de los datos en un momento dado.
+
+### Características:
+
+- No replica cambios en tiempo real.  
+- Vuelve a generar y distribuir un snapshot completo en intervalos programados.  
+- No requiere monitorear el log.  
+- Simple de configurar.
+
+### Cuándo se utiliza:
+
+- Tablas que cambian poco.  
+- Datos de catálogos o maestros.  
+- Escenarios donde la sincronización inmediata no es necesaria.
+
+### Desventaja:
+
+- Si los datos son grandes, reenviar snapshots consume tiempo y recursos.
+
+---
+
+# 3. Replicación de Mezcla (Merge Replication)
+
+Permite que **tanto el publicador como los suscriptores modifiquen datos** y luego sincroniza los cambios.
+
+### Características:
+
+- Ideal para entornos desconectados o móviles.  
+- Permite conflictos de datos (y reglas para resolverlos).  
+- Sincronización bidireccional.  
+- Cada nodo trabaja independientemente y luego “mezcla” los cambios.
+
+### Usos típicos:
+
+- Aplicaciones móviles.  
+- Trabajo en campo (sistemas offline).  
+- Sucursales sin conexión permanente.
+
+### Desventajas:
+
+- Manejo de conflictos.  
+- Sobrecarga de metadatos.
+
+---
+
+# 4. Replicación Peer-to-Peer
+
+Todos los nodos actúan como publicadores y suscriptores simultáneamente (topología **multi-master**).
+
+### Características:
+
+- Sin puntos únicos de falla.  
+- Altísima disponibilidad.  
+- Replica cambios entre todos los nodos del clúster.  
+- Ideal para escalabilidad horizontal.
+
+### Cuándo se usa:
+
+- Sistemas distribuidos de alta carga.  
+- Infraestructuras críticas que no pueden detenerse.  
+- Entornos donde todos los nodos deben aceptar escrituras.
+
+### Desventajas:
+
+- Requiere SQL Server Enterprise.  
+- Estricto control de claves para evitar colisiones.
+
+---
+
+# 5. Replicación Bidireccional (Legacy)
+
+Similar a la transaccional, pero permite replicación **en ambos sentidos** entre dos servidores.
+
+### Importante:
+
+- Fue un método anterior al Peer-to-Peer.  
+- Actualmente se considera obsoleta.
+
+---
+
+# 6. Replicación Híbrida  
+(Azure → SQL Server / SQL Server → Azure)
+
+SQL Server permite replicar datos hacia y desde **Azure SQL Database**.
+
+### Usos:
+
+- Migraciones graduales a la nube.  
+- Sincronización entre sistemas locales y servicios Azure.  
+- Replicación hacia servicios externos.
+
+---
+
+En sistemas como **SISGYM**, con múltiples usuarios remotos y necesidad de datos actualizados, la **replicación transaccional** fue la más eficiente y adecuada.
+
 
 ---
 
