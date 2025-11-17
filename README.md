@@ -373,6 +373,8 @@ Con las entidades identificadas se elaboró un **modelo ER** que representa:
 
 El objetivo fue obtener una visión abstracta y precisa del sistema, independiente del motor de base de datos, como base para el diseño lógico.
 
+![Paso 1](/image-ddl.png)
+
 > Se elaboró un **DER (Diagrama Entidad–Relación)** que refleja el diseño conceptual de SISGYM.
 
 ---
