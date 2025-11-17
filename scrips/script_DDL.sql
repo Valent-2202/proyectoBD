@@ -22,10 +22,10 @@ create table medio_pago (
 create table pais (
   id_pais         int identity(1,1) not null,
   nombre          varchar(50) not null,
-  cant_habitantes int null,
+  cant_habitantes int not null,
   constraint pk_pais primary key (id_pais),
   constraint uq_pais_nombre unique (nombre),
-  constraint ck_pais_habitantes check (cant_habitantes is null or cant_habitantes > 0)
+  constraint ck_pais_habitantes check (cant_habitantes > 0)
 );
 
 create table provincia (
