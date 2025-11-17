@@ -25,7 +25,7 @@ create table pais (
   cant_habitantes int null,
   constraint pk_pais primary key (id_pais),
   constraint uq_pais_nombre unique (nombre),
-  constraint ck_pais_habitantes check (cant_habitantes is null or cant_habitantes >= 0)
+  constraint ck_pais_habitantes check (cant_habitantes is null or cant_habitantes > 0)
 );
 
 create table provincia (
