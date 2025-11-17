@@ -2,7 +2,7 @@ USE proyectoBD;
 GO
 
 /* =========================================================
-   1) CARGA INICIAL DE CATÁLOGOS Y MAESTROS
+   CARGAMOS
    ========================================================= */
 
 -- ESTADOS
@@ -18,7 +18,7 @@ GO
 
 
 /* =========================================================
-   2) GEOGRAFÍA
+   GEOGRAFIA
    ========================================================= */
 
 -- 🔸 Si la columna codigo_postal no existe, la agregamos
@@ -57,7 +57,7 @@ GO
 
 
 /* =========================================================
-   3) ENTRENADORES
+   ENTRENADORES
    ========================================================= */
 
 INSERT INTO entrenador 
@@ -70,7 +70,7 @@ GO
 
 
 /* =========================================================
-   4) CONTACTOS Y SOCIOS
+   CONTACTOS Y SOCIOS
    ========================================================= */
 
 -- Contactos generales
@@ -101,7 +101,7 @@ GO
 
 
 /* =========================================================
-   5) TURNOS
+   TURNOS
    ========================================================= */
 
 INSERT INTO turno (nombre, horario_desde, horario_hasta, id_entrenador, id_sede)
@@ -114,7 +114,7 @@ GO
 
 
 /* =========================================================
-   6) ASISTENCIAS DIARIAS
+   ASISTENCIAS DIARIAS
    ========================================================= */
 
 INSERT INTO asistencia_diaria (id_socio, id_turno, fecha, estado)
@@ -128,7 +128,7 @@ GO
 
 
 /* =========================================================
-   7) SUSCRIPCIONES Y PAGOS
+   SUSCRIPCIONES Y PAGOS
    ========================================================= */
 
 INSERT INTO suscripcion (fecha_suscripcion, id_socio, id_estado)
@@ -147,7 +147,7 @@ GO
 
 
 /* =========================================================
-   8) REGISTROS DE PRUEBA Y CONSULTAS
+   REGISTROS DE PRUEBA Y CONSULTAS
    ========================================================= */
 
 -- Entrenador adicional
