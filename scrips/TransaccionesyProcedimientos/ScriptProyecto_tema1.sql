@@ -39,7 +39,7 @@ EXEC sp_Socio_Alta
     @apellido_socio = 'Gauna',
     @fecha_nacimiento = '2002-07-26';
 
---------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------
 
 
 /*Creacion de Procedimiento para Suscripcion y que se inserte un pago */
@@ -167,7 +167,7 @@ exec dbo.fn_turno_ocupado
     @horario_desde = '12:00',
     @horario_hasta = '16:00'
 
-/*Procedimiento para ingresar un entrenador  */----------------------------------------------------------------------------------------
+/*Procedimiento para ingresar un entrenador  */
 
 
 
@@ -317,7 +317,7 @@ EXEC sp_baja_logica_entrenador
 
 select * from entrenador
 select * from turno
------------------------------------------------------------------------------------------------------------------------------------------
+
 /*Baja Logica de Socio */
 
 CREATE OR ALTER PROCEDURE sp_baja_logica_socio
@@ -351,7 +351,7 @@ EXEC sp_baja_logica_socio @id_socio = 5;
 
 select * from socio s where s.id_socio = 5 
 
-/*Reactivar Entrenador */---------------------------------------------------------------------------------------------------------------
+/*Reactivar Entrenador */
 
 CREATE OR ALTER PROCEDURE sp_reactivar_entrenador
   @id_entrenador INT
@@ -417,3 +417,43 @@ EXEC sp_reactivar_socio @id_socio = 5;
 select * from socio s where s.id_socio = 5 
 
 select * from asistencia_diaria
+----------------------------------------------------------------------------------------------------------------------------------------------
+-- borrar una sede (solo si no tiene turnos asociados)
+create or alter procedure sp_eliminar_sede
+  @id_sede int
+as
+begin
+    if exists (select 1 from turno where id_sede = @id_sede)
+    begin
+        raiserror('no se puede borrar la sede porque tiene turnos asociados.', 16, 1); /* 16 gravedad/severity de error */
+        return;
+    end;
+
+    delete from sede
+    where id_sede = @id_sede;
+end;
+
+exec sp_eliminar_sede
+@id_sede = 6
+
+select * from sede
+----------------------------------------------------------------------------------------------------------------------------------------------
+/*Crear Sede */
+
+create or alter procedure sp_crear_sede
+  @direccion    varchar(120),
+  @id_localidad int,
+  @estado       bit = 1       -- 1 = activa, 0 = inactiva
+as
+begin
+    insert into sede (direccion, estado, id_localidad)
+    values (@direccion, @estado, @id_localidad);
+
+    select scope_identity() as id_sede_creada;
+end;
+
+exec sp_crear_sede
+  @direccion    = 'Mendoza 1895',
+  @id_localidad = 1,   -- tiene que existir en localidad
+  @estado       = 1;
+
