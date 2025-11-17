@@ -34,7 +34,7 @@ Año: 2025
 
 
 
-# 📑 Índice
+#  Índice
 
 - [CAPÍTULO I — INTRODUCCIÓN](#capítulo-i--introducción)
   - [1. Caso de Estudio](#1-caso-de-estudio)
