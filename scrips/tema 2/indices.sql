@@ -1,5 +1,15 @@
 ﻿--use proyectobd; 
 
+--clonamos la tabla asistencia_diaria para poder hacer un heap forzando el table scan
+
+select *
+into asistencia_sin_indice
+from asistencia_diaria;
+go
+
+--verificamos si la insercion fue realizada
+
+select count(*) from asistencia_sin_indice
 /* 
 carga de 1.000.000 de socios
 */
@@ -119,8 +129,8 @@ primary key nonclustered (id_socio, id_turno, fecha);
 go
 
 
---consulta
-print '--- consulta sin índices (tabla asistencia_sin_indice) ---';
+--consulta sin indice ya con la pk nonclustered
+print '--- consulta sin índices (tabla asistencia_diaria) ---';
 
 set statistics io on;
 set statistics time on;
@@ -130,6 +140,17 @@ from asistencia_diaria
 where fecha between '2000-01-01' and '2025-11-30';
 go
 
+--consulta en heap
+print '--- consulta sin índices (tabla asistencia_sin_indice) ---';
+
+set statistics io on;
+set statistics time on;
+
+select id_socio, id_turno, estado
+from asistencia_sin_indice
+where fecha between '2000-01-01' and '2025-11-30';
+go
+--
 
 /*
   PRUEBAS CON INDICE AGRUPADO
