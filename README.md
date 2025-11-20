@@ -713,22 +713,36 @@ Esto:
 
 ### 3. Optimización mediante Índices  
 
-Se analizaron tres escenarios:
+Se trabajó con la tabla `asistencia_diaria` generando 1.000.000 de registros para ver cómo cambia el rendimiento de la misma consulta por rango de fechas según los índices definidos.
 
-- Consulta sin índices (`Table Scan`)  
-- Índice **clustered**  
-- Índice **nonclustered** de cobertura (`INCLUDE`)  
+Primero se aclara que la `PRIMARY KEY (id_socio, id_turno, fecha)` ya es un **índice clustered** por defecto, así que la “tabla original” nunca estuvo realmente sin índice.
 
-Resultados:
+Para poder comparar, se hicieron estos escenarios:
 
-- Reducción significativa de lecturas lógicas  
-- Menor costo en el plan de ejecución  
-- Acceso directo mediante `Index Seek`  
-- Mejor desempeño del índice clustered en grandes volúmenes, por el orden físico de las páginas  
+- **Tabla original con PK clustered**:  
+  La consulta usa un **Clustered Index Scan** sobre la PK, escaneando casi toda la tabla porque el rango de fechas devuelve la mayoría de las filas.
+
+- **PK nonclustered (tabla HEAP)**:  
+  Se cambia la PK a **NONCLUSTERED**, la tabla pasa a ser un **heap** y la consulta hace **Table Scan**, leyendo todas las filas, con costo similar al caso anterior.
+
+- **Tabla clonada sin PK ni índices (`asistencia_sin_indice`)**:  
+  Heap “puro” creado con `SELECT INTO`. La consulta vuelve a hacer **Table Scan**; este es el caso de **consulta sin índices de verdad**.
+
+- **Índice CLUSTERED en `fecha` sobre `asistencia_con_indice`**:  
+  Se crea `CX_Asistencia_Fecha` y la consulta pasa a un **Clustered Index Seek**, usando el orden físico por fecha y leyendo las páginas de forma secuencial, con menor costo de E/S que los Table Scan.
+
+- **Índice NONCLUSTERED de cobertura en `fecha` con `INCLUDE (id_socio, id_turno, estado)`**:  
+  La consulta se resuelve con **Nonclustered Index Seek**, obteniendo todas las columnas directamente del índice, **sin Key Lookups**.
+
 
 Conclusión:
 
-- Los índices estratégicos son fundamentales para el patrón de consultas de SISGYM.  
+- La **PK cuenta como índice**: mientras haya PK clustered, la consulta NO está “sin índice”.
+- Para búsquedas por **rango de fechas**, un **índice clustered en `fecha`** mejora mucho el acceso (Seek + lectura secuencial).
+- Un **índice nonclustered de cobertura** sobre `fecha` + `INCLUDE` es muy eficiente cuando siempre se consultan las mismas columnas.
+- Las tablas **HEAP** sin índices útiles obligan a **Table Scan**, lo que escala mal con millones de filas.
+- Esto confirma las recomendaciones de Microsoft:  
+  diseñar índices según el patrón real de consultas, combinar **clustered + nonclustered** (idealmente de cobertura) y evitar depender de Table Scan en tablas grandes.
 
 ---
 
