@@ -35,20 +35,20 @@ create table provincia (
   id_pais             int not null,
   constraint pk_provincia primary key (id_provincia),
   constraint fk_provincia_pais foreign key (id_pais) references pais(id_pais),
-  constraint uq_provincia_nombre_pais unique (nombre, id_pais)
+  constraint uq_provincia_nombre_pais unique (nombre, id_pais),
   constraint ck_provincia_habitantes check (cantidad_habitantes > 0)
 );
 
 create table localidad (
   id_localidad        int identity(1,1) not null,
   nombre              varchar(50) not null,
-  cantidad_habitantes int not null,
+  cantidad_habitantes_localidad int not null,
   codigo_postal       int not null,    
   id_provincia        int not null,
   constraint pk_localidad primary key (id_localidad),
   constraint fk_localidad_provincia foreign key (id_provincia) references provincia(id_provincia),
-  constraint uq_localidad_nombre_prov unique (nombre, id_provincia)
-  constraint ck_provincia_habitantes check (cantidad_habitantes > 0)
+  constraint uq_localidad_nombre_prov unique (nombre, id_provincia),
+  constraint ck_localidad_habitantes check (cantidad_habitantes_localidad > 0)
 );
 
 create table sede (
